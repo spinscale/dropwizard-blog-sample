@@ -1,0 +1,11 @@
+{
+    "article": {
+
+        "properties": {
+            "text":                { "type": "string", "analyzer": "strip_html_analyzer" },
+            "dateCreated":         { "type": "date", "format": "EEE MMM d yyyy HH:mm:ss Z" }
+        }
+        
+    }
+    
+}

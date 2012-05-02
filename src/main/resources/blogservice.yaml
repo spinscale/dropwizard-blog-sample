@@ -1,0 +1,10 @@
+host: localhost
+port: 9300
+
+datadir: data
+
+loadInitialData: true
+initialDataAdminUsername: admin
+initialDataAdminPassword: test123
+initialDataAdminFullname: Alexander Reelsen
+initialDataDirectory: src/main/resources/articles

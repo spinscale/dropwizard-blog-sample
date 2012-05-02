@@ -1,0 +1,14 @@
+.tagcloud {
+  width: 400px;
+  background: #369;
+  line-height: 40px;
+  padding: #20px;
+  border: 1px solid #000;
+  margin: auto;
+}
+.tagcloud a{
+  font-family: 'Lobster Two', Cursive;
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+}

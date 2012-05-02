@@ -1,0 +1,166 @@
+title: Using Dropwizard with Elasticsearch as backend
+dateCreated: 2012-04-22T20:12:12.000Z
+tags: [dropwizard, elasticsearch, jquery, twitter-bootstrap, handlebars]
+author: Alexander Reelsen
+text: <p>This is a sample application, which shows off some dropwizard features by implementing a small blog. Elasticsearch is used as storage backend. <br />
+  In order to understand most of the stuff here you should have read the <a href="http://dropwizard.codahale.com/getting-started/">dropwizard getting started guide</a>, perhaps the 
+  <a href="http://dropwizard.codahale.com/manual/">dropwizard manual</a> and have a normal grip on web development - I am not a guru either.</p>
+  <h4>Getting it up and running locally</h4>
+  <p>
+  <ul>
+  <li>Clone the github project <code>git clone https://github.com/spinscale/dropwizard-blog-sample</code></li>
+  <li>mvn package</li>
+  <li><code>java -jar target/dropwizard-blog-0.0.1-SNAPSHOT.jar</code></li>
+  <li>Go to <a href="http://localhost:8080/">http://localhost:8080/</a> or to <a href="http://localhost:8080/admin">http://localhost:8080/admin</a> with login admin/test123</li>
+  <li>In case you want to check out the source, do not forget to run something like <code>mvn eclipse:eclipse</code> to support your IDE</li>
+  </ul>
+  </p>
+  
+  <h4>Technologies used</h4>
+  
+  <h5>Dropwizard</h5>
+  <p>The last java based web framework I immediately liked after reading the documentation was the <a href="http://www.playframework.org">playframework</a>.
+  As I am always looking for new stuff, I quite a lot liked the principles of the dropwizard, so I decided to hack up a short demo to check if it is worth to use it in production when possible.
+  My first thought was, that it is just for API implementations and has only little use web sites - but it turned out this has worked quite well.
+  </p>
+  
+  <h5>Elasticsearch</h5>
+  <p>
+  One of the <a href="">coolest open source projects</a> currently available. Elasticsearch provides a neat abstraction layer on top of lucene, which is used
+  for storing entries and users as well as querying. You can argue if a lucene index is the correct way of storing blog entries, but this is merely done
+  for demo purposes in this case. As it is an indexing tool, we can simply index the whole HTML and let elasticsearch strip of the HTML source and index
+  only in the text. You should check the configuration at <code>src/main/resources/elasticsearch-local.yml</code> for more information. Furthermore there is also
+  a special mapping for the articles indexed in <code>src/main/resources/elasticsearch-mapping.json</code>.
+  </p>
+  
+  <h5>Twitter Bootstrap</h5>
+  <p>
+  <a href="http://twitter.github.com/bootstrap">Defacto standard</a> for rapid prototyping for people like me, who do not have a clue about GUI design.
+  Not much more to say, except there are themes now, so that not every sites looks like this one.
+  </p>
+  
+  <h5>Handlebars.js, momentjs</h5>
+  <p>
+  As my main intention of this project was to create a one page layout - while still being able to support search engines and provide search engine friendly links -
+  there is basically one page for viewing articles and one page for administrating them. In order to split a little part of, I used handlebars.js for templating.
+  In case you never heard of it, check <a href="http://handlebarsjs.com/">handlebars.js homepage</a> and be inspired by its simplicity. <br />
+  The next great library I used was for parsing dates. If you are used to SimpleDateFormat of java, just try out <a href="http://momentjs.com/">moment.js</a>, which makes it totally
+  simple to parse dates. I also made a date parsing helper for handlebars with this, which you can check in <code>src/main/resources/assets/js/blog.js</code>. 
+  </p>
+   
+  <h5>jQuery</h5>
+  <p>
+  jQuery is sort of like twitter bootstrap. No need to talk about it. But I used of course some plugins with it - like <a href="http://trentrichardson.com/examples/timepicker/">datetimepicker</a>,
+  <a href="https://github.com/xoxco/jQuery-Tags-Input">tags input</a>, a <a href="https://github.com/macek/jquery-to-json">formToJson serializer</a>
+  and <a href="http://www.quaese.de/texte/webdesign/qp_webtemplate1.php">jq tagcloud</a>. Except the tagcloud, all of these are used in the admin interface. 
+  </p>
+  
+  <h4>Application layout</h4>
+  <p>
+  I decided to take a simple application and package layout, somewhat similar to a playframework application, with a package hierarchy which does not include
+  company package names like <code>de.spinscale.whatever.novel.you.want.to.write</code> but rather the simple approach.
+  </p>
+  
+  <h5>Entities</h5>
+  <p>
+  The <code>models</code> package contains three models, from which two are persisted into the database as they are defined. The <code>Article</code>
+  entity contains a slug, which is part of the URL and standard article attributes like title, a creation date, some tags, an author and the content itself. <br />
+  The <code>User</code> entity is only used for authentication in the admin area. <br/>
+  The <code>Tag</code> is used only for helping to render the tag cloud.
+  </p>
+  
+  <h5>Views</h5>
+  <p>
+  Even though I do not really like <a href="http://freemarker.sourceforge.net/">FreeMarker</a>, it is still one of the best templating engines available. GSP is a mess, velocity very similar and the only one
+  I really like is the groovy-based one included in the playframework.
+  As most of the rendering is intended to be done in the client, there is actually no need for lots of views as most communication is done via JSON, where
+  you can return standard entities with dropwizard. There is the main page view called <code>ArticlesView.ftl</code>, which includes a list of articles to be
+  rendered via FreeMarker. The page includes a <code>header.ftl</code> as well as a <code>footer.ftl</code>, which loads all the javascript. <br />
+  The <code>ArticleView.ftl</code> should not be loaded with a javascript enable browser, but is used to render a single article. <br />
+  The <code>AdminArticlesView.ftl</code> is rendered only, if you have authenticated correctly at the resource via HTTP basic auth and includes all the
+  code to administer the articles.
+  </p>
+  
+  <h5>Daos</h5>
+  <p>
+  As there is no real ORM and sadly no ActiceRecord Pattern for entities (again here I absolutely like the play framework approach),
+  when elasticsearch is used as storage backend, I decided to create some DAO functionality. The daos are not only used for loading and storing entities,
+  but rather for serializing and deserializing (which could be sorted into other classes of course, as this is no real DAO functionality) entities from
+  and into elasticsearch. De-/Serialzing is used via the builtin json object of the dropwizard <code>AbstractService</code> class. You could argue of course about how
+  useful it is to serialize the JSON stream from the client to POJOs just in order to store them in elasticsearch again. But this approach works in our case.
+  </p>
+  
+  <h5>Resources</h5>
+  <ul>
+  <li><code>RootResource</code> on <code>/</code>:&nbsp;Renders the starting page which shows the most up-to-date articles and returns an <code>ArticlesView</code>
+  This means you could also get JSON data by simply adding the header field <code>Accept:&nbsp;application/json</code> - which is indeed a very nice feature of any class
+  extending from <code>View</code></li>
+  <li><code>AdminResource</code> on <code>/admin</code>:&nbsp;The admin interface. Allows you to edit, delete or create new posts. Needs HTTP basic auth and an
+  existing user in order to work.</li>
+  <li><code>SlugResource</code> on <code>/article/{slug}</code>:&nbsp;As the name says, this resource allows you to access articles via its slug. Getting and deleting articles is possible.
+  Deleting needs authentication of course.</li>
+  <li><code>ArticleResource</code> on <code>/article</code>:&nbsp;Allows you to store new articles and thus needs authentication as well.</li>
+  <li><code>SearchResource</code> on <code>/search</code>:&nbsp;Returns a list of articles via search. again via an <code>ArticleView</code>. Search in the slug and text. Should possibly 
+  also search in the tags. Might be a try for you to implement.</li>
+  <li><code>TagResource</code> on <code>/tags</code>:&nbsp;Returns the content needed to display the tag cloud and simply does a facetting query on the tags field of all
+  currently active articles.</li>
+  <li><code>TagSearchResource</code> on <code>/tags/{tag}</code>:&nbsp;This is needed in order to filter by tag, when a tag on the tagcloud has been clicked finally.</li>
+  <li><code>FeedResource</code> on <code>/feed/{type}.xml</code>:&nbsp;A blog without feeds would not be imaginable, so this one uses the ROME library to create ATOM, RSS1 and RSS2.0 feeds.
+  Also it streams the output to the client instead if writing it all at once.</li>
+  </ul>
+  
+  <h5>Authentication</h5>
+  <p>
+  I wrote an own authenticator to authenticate against elasticsearch. The <code>ElasticSearchAuthenticator</code> uses the <code>userDao</code> to access users in the elasticsearch
+  storage. Passwords are stored in cleartext as this is a PoC. 
+  </p>
+  
+  <h5>Javascript</h5>
+  <p>
+  The whole logic of the application is put into <code>blog.js</code>. It yields the code of the start page as well as the admin code page - which would usually be plain wrong.
+  This script holds most of the logic for the one-page-layout. It adds lots of click handlers to prevent page reloads, loads the tag cloud after page load, executes searches and 
+  provides the functionality for the admin mode.  
+  </p>
+  
+  <h4>One Page Layout</h4>
+  <p>I decided to try out a one page layout which does not need a browser reload in case you click on an article, a tag cloud or enter something in the search form.
+  If this would be a bigger application, you possibly would split your application in some widgets, which in turn would query arbitrary data sources. The
+  <a href="http://dojotoolkit.org/reference-guide/1.7/dojox/widget/Portlet.html">Dojox Portlet</a> is a pretty nice example of how to do this.
+  </p>
+  
+  <h4>Search</h4>
+  <p>As elasticsearch is powered by Lucene in its core, searching is of course its specialty. I only implemented a very rudimentary search, when a term is
+  entered in the search box. The search is performed in the slug and in the text, but could possibly also be done in the tags  - whatever you want. If you
+  take a look at <code>src/main/resources/elasticsearch-local.yml</code> and <code>src/main/resources/elasticsearch-mapping.json</code> in order to see the
+  elasticsearch configuration. Searches are always done with a date filter, which filters articles with a date in the future.
+  </p>
+  
+  <h4>Tag cloud</h4>
+  <p>The tag cloud uses a special search functionality in elasticsearch, namely a facetted search, which aggregates information of all currently active articles
+  and sums the every tag and its count. It then is rendered by the tag resource.
+  </p>
+  
+  <h4>Admin backend</h4>
+  <p>I could have implemented some login and cookie based solution, but I decided to stick with HTTP basic auth and the use of the <code>ElasticSearchAuthenticator</code>
+  in order to authenticate users. The admin backend is available at <a href="http://localhost:8080/admin">/admin</a> and allows you do create, delete (+ confirmation) and
+  exchange posts. Here I also used most of the jquery plugins like tag editor and the date picker.
+  </p>
+  
+  <h4>Testing with FluentLenium</h4>
+  <p>
+  I created one standard resource test under <code>SlugResourceTest</code>, which needed some manually tweaking because the <code>ArticleView</code> wraps the article
+  JSON data into another <code>article :&nbsp;{ $restOfArticle }</code> form. The other test has been implemented using <a href="https://github.com/FluentLenium/FluentLenium">FluentLenium</a>,
+  a nice addon on top of selenium, which is like <a href="http://www.gebish.org/">Geb</a>, but in pure Java instead of Groovy.<br />
+  A big disadvantage of running the test is that I need a started dropwizard application. In this sample the application is started via a thread in the background, then I wait 10 seconds for
+  startup and run the selenium tests (which also need a browser so it does not work with CI integration like a command line based hudson). This is not ideal,  so if you know a better solution,
+  let me know.
+  </p>
+  
+  <h4>TODO</h4>
+  <p>
+  There are tons of little features I would like to implement before this is complete (even complete as for a prototype). Keep in mind that it should merely serve as a prototype
+  application and not a fully fledged solution.<br />
+  If you have a nice idea how to simply fix to run the selenium tests only in the maven integration phase, please mail it to me. I am going crazy with all these plugins and its <code>mvn
+  integration-test</code> phase screw up.<br />
+  Oh, and put up some more documentation of course.
+  </p>
