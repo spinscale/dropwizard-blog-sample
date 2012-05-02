@@ -158,6 +158,7 @@ text: <p>This is a sample application, which shows off some dropwizard features 
   
   <h4>TODO</h4>
   <p>
+  This application has only been tested with chrome (and a little bit with firefox in the selenium tests), so I have no clue if it works with other browsers.
   There are tons of little features I would like to implement before this is complete (even complete as for a prototype). Keep in mind that it should merely serve as a prototype
   application and not a fully fledged solution.<br />
   If you have a nice idea how to simply fix to run the selenium tests only in the maven integration phase, please mail it to me. I am going crazy with all these plugins and its <code>mvn
