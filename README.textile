@@ -1,0 +1,12 @@
+h1. Dropwizard sample application
+
+This is a small sample application utilizing the nice dropwizard framework, which uses elasticsearch as its storage backend.
+
+h2. Installation
+
+* git clone https://github.com/spinscale/dropwizard-blog-sample
+* mvn package
+* java -jar target/dropwizard-blog-0.0.1-SNAPSHOT.jar
+* Go to http://localhost:8080/ or to http://localhost:8080/admin with login admin/test123
+* In case you want to check out the source, do not forget to run something like mvn eclipse:eclipse to support your IDE
+
