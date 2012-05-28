@@ -2,16 +2,25 @@ package web;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static test.DropwizardTestServer.*;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.fluentlenium.adapter.FluentTest;
 import org.fluentlenium.core.annotation.Page;
+import org.junit.Rule;
 import org.junit.Test;
 
+import services.BlogService;
+import test.DropwizardTestServer;
 import web.pages.IndexPage;
+import configurations.ApplicationConfiguration;
 
-public class MainPageTest extends BaseTest {
+public class MainPageTest extends FluentTest {
+
+    @Rule
+    public DropwizardTestServer<ApplicationConfiguration, BlogService> testServer
+                       = testServer(ApplicationConfiguration.class, BlogService.class, "src/main/resources/blogservice.yaml");
 
     @Page
     public IndexPage indexPage;

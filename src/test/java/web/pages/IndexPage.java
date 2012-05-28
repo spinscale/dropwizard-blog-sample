@@ -12,18 +12,18 @@ import org.fluentlenium.core.annotation.AjaxElement;
 import org.fluentlenium.core.domain.FluentList;
 import org.fluentlenium.core.domain.FluentWebElement;
 
-import web.BaseTest;
-
 import com.google.common.collect.Lists;
 
 public class IndexPage extends FluentPage {
+
+    public static final String BASE_URL = "http://localhost:8080";
 
     @AjaxElement
     FluentWebElement tagcloud;
 
     @Override
     public String getUrl() {
-        return BaseTest.BASE_URL + "/";
+        return BASE_URL + "/";
     }
 
     @Override

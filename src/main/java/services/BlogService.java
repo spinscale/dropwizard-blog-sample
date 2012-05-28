@@ -38,7 +38,11 @@ import daos.impl.UserDaoImpl;
 public class BlogService extends Service<ApplicationConfiguration> {
 
     public static void main(String[] argv) throws Exception {
-        new BlogService("blog").run(new String[] {"server", "src/main/resources/blogservice.yaml"});
+        new BlogService().run(new String[] {"server", "src/main/resources/blogservice.yaml"});
+    }
+
+    public BlogService() {
+        this("blog");
     }
 
     protected BlogService(String name) {
