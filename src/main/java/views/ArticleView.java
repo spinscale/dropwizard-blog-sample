@@ -2,14 +2,12 @@ package views;
 
 import models.Article;
 
-import com.yammer.dropwizard.views.View;
-
-public class ArticleView extends View {
+public class ArticleView extends JsView {
 
     private Article article;
 
     public ArticleView(Article article) {
-        super("/views/ArticleView.ftl");
+        super("/views/js/ArticleView.hbr");
         this.article = article;
     }
 

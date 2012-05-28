@@ -8,3 +8,9 @@ initialDataAdminUsername: admin
 initialDataAdminPassword: test123
 initialDataAdminFullname: Alexander Reelsen
 initialDataDirectory: src/main/resources/articles
+
+requireJsPath: src/main/resources/assets/js/
+
+otherJs:
+  - src/main/resources/assets/js/render/handlebars-1.0.0.beta.6.js
+  - src/main/resources/assets/js/render/handlebars-helper.js

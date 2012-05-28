@@ -50,6 +50,7 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
     <script src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars-1.0.0.beta.6.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script src="/assets/js/moment.min.js"></script>
@@ -60,8 +61,8 @@
 
 <script id="article-template" type="text/x-handlebars-template">
 <div class="row">
-<h2><a href="/article/{{article.slug}}">{{article.title}}</a></h2>
-<h3>by {{article.author}}, at {{formatDate article.dateCreated}}</h3>
+<h2><a href="/article/\{{article.slug}}">\{{article.title}}</a></h2>
+<h3>by \{{article.author}}, at \{{formatDate article.dateCreated}}</h3>
 <div>{{{article.text}}}</div>
 </div>
 </script>

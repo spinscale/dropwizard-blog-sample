@@ -1,5 +1,6 @@
 var lastSearch = ""
 var articleTemplate
+var partials = {}
 
 Handlebars.registerHelper('formatDate', function(date) {
 //	if (format == null) {
@@ -13,10 +14,26 @@ function parseSearchResults(data) {
 	if (data.articles != undefined && data.articles.length > 0) {
 		$('.articles').empty()
 		$.each(data.articles, function(index, value) {
-			var html = articleTemplate({article: value})
-			$('.articles').append(html)
+			var template = getTemplate("article")
+			var compiledTemplate = Handlebars.compile(template);
+			var renderedTemplate = compiledTemplate({article: value})
+			$('.articles').append(renderedTemplate)
 		})
 	}
+}
+
+function getTemplate(name) {
+	if (partials[name] == null) {
+		$.ajax({
+	        async: false,
+	        url: '/template/' + name,
+	        'success': function (data) {
+	        	partials[name] = data
+	        }
+	    });
+	}
+		
+	return partials[name]
 }
 
 // Fill in the edit form in the admin frontend
@@ -57,9 +74,6 @@ function deleteArticle(slug) {
 }
 
 $(document).ready(function() {
-	var source = $('#article-template').html();
-	articleTemplate = Handlebars.compile(source);
-		
 	// Disable return on search
 	$('#search').keypress(function(e){
 		if ( e.which == 13 ) return false;

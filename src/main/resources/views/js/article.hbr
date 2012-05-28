@@ -1,0 +1,5 @@
+<div class="row">
+<h2><a href="/article/{{article.slug}}">{{article.title}}</a></h2>
+<h3>by {{article.author}}, at {{formatDate article.dateCreated}}</h3>
+<div>{{{article.text}}}</div>
+</div>

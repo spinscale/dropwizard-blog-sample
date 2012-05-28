@@ -1,0 +1,80 @@
+title: Rendering serverside javascript templates with dropwizard
+dateCreated: 2012-05-27T10:28:43.00Z
+tags: [handlebars, dropwizard, ssjs, javascript, rhino]
+author: Alexander Reelsen
+text: <p>As introduced in the last post, I already wrote, that I do not like two rendering engines for frontend and backend.
+  As I do not want to have FreeMarker in the browser, I wanted to render Handlebars templates on the serverside.<br >
+  <b>Do not use this javascript renderer in production. It is full of memory leaks, possibly not thread-safe and not performant. But it serves its proof of concept purpose</b>
+  </p>
+  
+  <h4>Adding rhino as dependency</h4>
+  <p>
+  <a href="http://www.mozilla.org/rhino/">Mozilla Rhino</a> seems the only javascript engine written in Java. I found support for <a href="http://code.google.com/p/jav8/">V8 via JSR-223</a> but was afraid of using it, as I thought it might be easier with rhino. Not sure if I would do this again.
+  </p>
+  
+  <h4>Adding a message body writer</h4>
+  <p>
+  The first step is to disable the freemarker engine (simply remove the dependency from the <code>pom.xml</code> file) and replace the components step by step. The <code>JsViewMessageBodyWriter</code> takes a <code>JsView</code> class and uses the <code>JsRenderer</code> to create the final rendererd HTML by populating the templates with data of the <code>JsView</code> class.<br />
+  Like the FreeMarker message body writer it only works for application types HTML and XHTML. 
+  </p>
+  
+  <h4>Creating a JsView class for views</h4>
+  <p>
+  The <code>JsView</code> class is completely ripped of the <code>View</code> class of the freemarker renderer. Nothing special here.
+  </p>
+  
+  <h4>The JsRenderer</h4>
+  <p>
+  This is the core of the application. Do not take anything for granted in the source, I did not really know what I was doing - but in the end it worked.<br />
+  The class is initialized in the <code>BlogService</code> class. It needs to configuration parameters.<br />
+  <code>requireJsPath</code> is needed to load javascript files based on the commonjs standard - like moment.js in our case (always remember that you do not have a browser environment on the server side).<br />
+  The <code>otherJs</code> config parameter is needed to load arbitrary other javascript files, like handlebars itself and a small helper class, which defines some partials like the header and the footer used.<br />
+  The most important part of the <code>JsRenderer</code> class is the <code>renderTemplate()</code> method, which takes a template as a string and JSON data as a string which are then rendered via javascript.
+  </p>
+  
+  <h5>Support for commonJs</h5>
+  <p>
+  I ripped off the support for commonJs from the rhino shell, which also includes the support already. You can find the code in <code>JsRenderer.loadRequireJsScripts</code>
+  </p>
+  
+  <h5>Support for registering partials for serverside rendering</h5>
+  <p>
+  In order to use partials on server side rendering, the have to be registered the standard handlebars way via <code>Handlebars.registerPartial</code>. This is done in the <code>handlebars-helper.js</code> file. Also there is a <code>readFile()</code> function used, which is also ripped of the rhino commandline shell, which is a neat little helper to read in the template files quick.
+  </p>
+  
+  <h4>A sample template</h4>
+  <p>
+  Enough talking, let the code speak. So this is what a template now looks like, this is the <code>ArticleView.hbr</code> template:&nbsp;
+  
+  <pre><code>
+  {{&gt; header }}<br />
+  <br />
+  &lt;div class="articles"&gt;<br />
+  <br />
+    &lt;div class="row"&gt;<br />
+      &lt;h2&gt;&lt;a href="/article/{{article.slug}}"&gt;{{article.title}}&lt;/a>&lt;/h2&gt;<br />
+      &lt;h3&gt;by {{article.author}}, at {{formatDate article.dateCreated}}&lt;/h3&gt;<br />
+      &lt;div&gt;{{{article.text}}}&lt;/div&gt;<br />
+     &lt;/div&gt;<br />
+  <br />
+  &lt;/div&gt;<br />
+  <br />
+  {{&gt; footer }}
+  </code></pre>
+  
+  As you can see, there is not too much difference to the freemarker template anymore.
+  </p>
+  
+  <h4>Performance and other issues</h4>
+  <p>
+  I have just hacked down the functionality of the javascript rendering engine without making up my mind about several things:&nbsp;
+  <ul>
+    <li><b>Thread-Safety:</b> I do not know whether the code in the JsRenderer is really thread-safe. I have to admit having problems to understand the rhino docu in this cases.</li>
+    <li><b>Performance:</b> It's slow, I create a JSON string of my render data, and the use <code>JSON.parse()</code> in the JSRenderer. I am sure this works way better as serializing to death.</li>
+    <li><b>Caching:</b> The handlebars compiler can first compile and the render the templates. It would be useful to compile and cache all the templates upfront.</li>
+    <li><b>Reload support:</b> Currently the partials for serverside rendering are read during startup and cannot be changed from then on. This is not ok for fast development cycles, there should be cache or something like that in development mode.</li>
+  </ul>
+  I do not intend to take this into production level. It was training day :-)<br />
+  To be honest, it seems to be a shitload of work taking it into a well tested module...
+  
+  </p>

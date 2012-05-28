@@ -1,0 +1,16 @@
+{{> header }}
+
+<div class="articles">
+
+{{#each articles}}
+<div class="row">
+<h2><a href="/article/{{slug}}">{{title}}</a></h2>
+<h3>by {{author}}, at {{formatDate dateCreated}}</h3>
+<div>{{{text}}}</div>
+</div>
+{{/each}}
+
+</div>
+
+
+{{> footer }}

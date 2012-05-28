@@ -4,19 +4,16 @@ import java.util.List;
 
 import models.Article;
 
-import com.yammer.dropwizard.views.View;
-
-public class AdminArticlesView extends View {
+public class AdminArticlesView extends JsView {
 
     private List<Article> articles;
 
     public AdminArticlesView(List<Article> articles) {
-        super("/views/AdminArticlesView.ftl");
+        super("/views/js/AdminArticlesView.hbr");
         this.articles = articles;
     }
 
     public List<Article> getArticles() {
         return articles;
     }
-
 }
