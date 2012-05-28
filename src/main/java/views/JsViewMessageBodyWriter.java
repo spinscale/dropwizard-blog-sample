@@ -2,6 +2,7 @@ package views;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -13,7 +14,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.commons.io.IOUtils;
+import com.google.common.io.CharStreams;
 
 import com.yammer.dropwizard.json.Json;
 import com.yammer.metrics.core.TimerContext;
@@ -46,7 +47,7 @@ public class JsViewMessageBodyWriter implements MessageBodyWriter<JsView> {
 
         try {
             InputStream is = getClass().getResourceAsStream(jsView.getTemplateName());
-            String templateString = IOUtils.toString(is);
+            String templateString = CharStreams.toString(new InputStreamReader(is, "UTF-8"));
 
             String jsonContext = json.writeValueAsString(jsView);
             String renderedTemplate = JsRenderer.renderTemplate(templateString, jsonContext);
