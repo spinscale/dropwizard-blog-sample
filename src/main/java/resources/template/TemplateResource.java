@@ -1,7 +1,10 @@
 package resources.template;
 
+import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -9,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.FileUtils;
 
 @Path("/template/{template}")
 public class TemplateResource {
@@ -25,7 +27,7 @@ public class TemplateResource {
         }
 
         try {
-            return FileUtils.readFileToString(templateFile);
+            return Files.toString(templateFile, Charset.forName("UTF-8"));
         } catch (IOException e) {
             throw new WebApplicationException();
         }
