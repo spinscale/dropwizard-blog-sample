@@ -1,6 +1,6 @@
 h1. Dropwizard sample application
 
-This is a small sample application utilizing the nice dropwizard framework, which uses elasticsearch as its storage backend.
+This is a small sample application utilizing the nice dropwizard framework, which uses elasticsearch as its storage backend and Mozilla Rhino as javascript rendering engine on the server side (you read that right, no freemarker).
 
 h2. Installation
 
