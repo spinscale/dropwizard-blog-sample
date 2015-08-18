@@ -18,6 +18,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -42,14 +44,14 @@ public class ArticleDaoImpl implements ArticleDao {
 
     public boolean deleteBySlug(String slug) {
         DeleteResponse deleteResponse = node.client().prepareDelete(INDEX, TYPE, slug).execute().actionGet();
-        return !deleteResponse.notFound();
+        return deleteResponse.isFound();
     }
 
     public Article findBySlug(String slug) {
         GetResponse response = node.client().prepareGet(INDEX, TYPE, slug).execute().actionGet();
-        if (response.exists()) {
+        if (response.isExists()) {
             try {
-                return json.readValue(response.sourceAsString(), Article.class);
+                return json.readValue(response.getSourceAsString(), Article.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -65,13 +67,12 @@ public class ArticleDaoImpl implements ArticleDao {
 
     public List<Article> findBySlugAndText(String slug, String text) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.should(QueryBuilders.textQuery("slug", slug));
-        boolQuery.should(QueryBuilders.textQuery("text", text));
+        boolQuery.should(QueryBuilders.matchQuery("slug", slug));
+        boolQuery.should(QueryBuilders.matchQuery("text", text));
 
         SearchResponse searchResponse = node.client().prepareSearch(INDEX).setTypes(TYPE).
             addSort("dateCreated", SortOrder.DESC).
-            setFilter(getNowDateFilter()).
-            setQuery(boolQuery).execute().actionGet();
+            setQuery(QueryBuilders.filteredQuery(boolQuery, getNowDateFilter())).execute().actionGet();
 
         return toArticles(searchResponse);
     }
@@ -79,10 +80,9 @@ public class ArticleDaoImpl implements ArticleDao {
     public List<Article> findNewestArticles(int count) {
         SearchResponse searchResponse = node.client().prepareSearch(INDEX).
                 setTypes(TYPE).
-                setQuery(QueryBuilders.matchAllQuery()).
-                setFilter(getNowDateFilter()).
                 addSort("dateCreated", SortOrder.DESC).
                 setSize(count).
+                setQuery(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), getNowDateFilter())).
                 execute().actionGet();
 
         return toArticles(searchResponse);
@@ -91,8 +91,7 @@ public class ArticleDaoImpl implements ArticleDao {
     public List<Article> findByTag(String tag) {
         SearchResponse searchResponse = node.client().prepareSearch(INDEX).setTypes(TYPE).
             addSort("dateCreated", SortOrder.DESC).
-            setFilter(getNowDateFilter()).
-            setQuery(QueryBuilders.termQuery("tags", tag)).execute().actionGet();
+            setQuery(QueryBuilders.filteredQuery(QueryBuilders.termQuery("tags", tag), getNowDateFilter())).execute().actionGet();
 
         return toArticles(searchResponse);
     }
@@ -118,12 +117,13 @@ public class ArticleDaoImpl implements ArticleDao {
             setTypes(TYPE).
             setQuery(QueryBuilders.matchAllQuery()).
             setSize(0).
-            addFacet(facetBuilder).
+            addAggregation(AggregationBuilders.terms("by_tags").field("tags").size(20)).
             execute().actionGet();
 
-        TermsFacet facetResult = searchResponse.facets().facet(TermsFacet.class, "tags");
-        for (TermsFacet.Entry entry : facetResult.entries()) {
-            tags.add(new Tag(entry.term(), entry.count()));
+        Terms tagsTerms = searchResponse.getAggregations().get("by_tags");
+        
+        for (Terms.Bucket entry : tagsTerms.getBuckets()) {
+            tags.add(new Tag(entry.getKey(), (int)entry.getDocCount()));
         }
 
         return tags;
@@ -136,7 +136,7 @@ public class ArticleDaoImpl implements ArticleDao {
     private List<Article> toArticles(SearchResponse searchResponse) {
         List<Article> articles = Lists.newArrayList();
 
-        for (SearchHit searchHit : searchResponse.hits().hits()) {
+        for (SearchHit searchHit : searchResponse.getHits().getHits()) {
             try {
                 Article article = json.readValue(searchHit.source(), Article.class);
                 articles.add(article);
