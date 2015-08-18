@@ -32,8 +32,8 @@ public class UserDaoImpl implements UserDao {
 
     public User findByUsername(String username) {
         GetResponse getResponse = node.client().prepareGet("users", "user", username).execute().actionGet();
-        if (getResponse.exists()) {
-            return toUser(getResponse.sourceAsString());
+        if (getResponse.isExists()) {
+            return toUser(getResponse.getSourceAsString());
         }
 
         return null;
