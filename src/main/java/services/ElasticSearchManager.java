@@ -64,7 +64,7 @@ public class ElasticSearchManager implements Managed {
         log.info("Trying to create index {}", name);
         try {
             CreateIndexResponse response = node.client().admin().indices().prepareCreate(name).setSettings(ImmutableSettings.settingsBuilder().put("numberOfShards", "1")).execute().actionGet();
-            log.info("Indexresponse for creating of index {}: {}", name, response.acknowledged());
+            log.info("Indexresponse for creating of index {}: {}", name, response.isAcknowledged());
         } catch (IndexAlreadyExistsException e) {}
     }
 

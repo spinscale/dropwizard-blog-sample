@@ -17,7 +17,7 @@ public class ElasticSearchHealthCheck extends HealthCheck {
     @Override
     protected Result check() throws Exception {
         ClusterHealthResponse clusterHealthResponse = node.client().admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-        return Result.healthy("Last status: " + clusterHealthResponse.status().name());
+        return Result.healthy("Last status: " + clusterHealthResponse.getStatus().name());
     }
 
 }
