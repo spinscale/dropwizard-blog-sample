@@ -1,14 +1,10 @@
 package daos.impl;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.collect.Lists;
+import com.yammer.dropwizard.json.Json;
+import daos.ArticleDao;
 import models.Article;
 import models.Tag;
-
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -20,14 +16,11 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
-import com.google.common.collect.Lists;
-import com.yammer.dropwizard.json.Json;
-
-import daos.ArticleDao;
+import java.io.IOException;
+import java.util.List;
 
 public class ArticleDaoImpl implements ArticleDao {
 

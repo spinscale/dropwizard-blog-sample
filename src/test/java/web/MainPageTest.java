@@ -42,13 +42,14 @@ public class MainPageTest extends FluentTest {
     }
 
     @Test
-    public void testThatSearchIsWorking() {
+    public void testThatSearchIsWorking() throws InterruptedException {
         goTo(indexPage);
         indexPage.search("Technologies");
         assertExistingArticles(1);
         assertArticleTitle("Using Dropwizard with Elasticsearch as backend");
         indexPage.search("second");
         assertExistingArticles(1);
+        Thread.sleep(500);
         assertArticleTitle("This is a blog post title");
     }
 
