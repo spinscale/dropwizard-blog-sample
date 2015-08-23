@@ -1,20 +1,22 @@
 package web;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static test.DropwizardTestServer.*;
-
-import java.util.concurrent.TimeUnit;
-
+import configurations.ApplicationConfiguration;
 import org.fluentlenium.adapter.FluentTest;
 import org.fluentlenium.core.annotation.Page;
 import org.junit.Rule;
 import org.junit.Test;
-
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import services.BlogService;
 import test.DropwizardTestServer;
 import web.pages.IndexPage;
-import configurations.ApplicationConfiguration;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static test.DropwizardTestServer.testServer;
 
 public class MainPageTest extends FluentTest {
 
@@ -48,6 +50,11 @@ public class MainPageTest extends FluentTest {
         indexPage.search("second");
         assertExistingArticles(1);
         assertArticleTitle("This is a blog post title");
+    }
+
+    @Override
+    public WebDriver getDefaultDriver() {
+        return new ChromeDriver();
     }
 
     private void assertArticleTitle(String title) {

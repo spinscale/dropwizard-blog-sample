@@ -3,3 +3,5 @@
 .settings
 data
 target
+*.iml
+.idea
